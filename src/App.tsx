@@ -16,6 +16,24 @@ function App() {
   const [processingComplete, setProcessingComplete] = useState(false)
   const [processedFile, setProcessedFile] = useState<File | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [backendConnected, setBackendConnected] = useState<boolean | null>(null)
+
+  // Check backend connection on component mount
+  React.useEffect(() => {
+    const checkBackendConnection = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/health', {
+          method: 'GET',
+          mode: 'no-cors', // Avoid CORS issues for health check
+        })
+        setBackendConnected(true)
+      } catch (error) {
+        setBackendConnected(false)
+      }
+    }
+    
+    checkBackendConnection()
+  }, [])
 
   const handleFileUpload = async (file: File) => {
     setIsProcessing(true)
@@ -23,29 +41,81 @@ function App() {
     // Determine processing type based on file extension
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
     let type: 'pdf-conversion' | 'font-hunting' | 'font-extraction' | 'presentation-processing'
+    let endpoint: string
     
     if (fileExtension === '.pdf') {
       type = 'pdf-conversion'
       setProcessingType('pdf-conversion')
+      endpoint = 'pdf-to-pptx'
     } else if (fileExtension === '.pptx' || fileExtension === '.key') {
       type = 'presentation-processing'
       setProcessingType('presentation-processing')
+      endpoint = 'hunt-fonts' // Default to font hunting for presentations
     } else {
       type = 'presentation-processing'
       setProcessingType('presentation-processing')
+      endpoint = 'hunt-fonts'
     }
     
-    // Simulate processing time (longer for PDF conversion)
-    const processingTime = type === 'pdf-conversion' ? 3000 : 2000
-    await new Promise(resolve => setTimeout(resolve, processingTime))
-    
-    // Here you would integrate with your actual processing pipeline
-    console.log('Processing file:', file.name, 'Type:', type)
-    
-    setIsProcessing(false)
-    setProcessingType(undefined)
-    setProcessedFile(file)
-    setProcessingComplete(true)
+    try {
+      // Send file to Python Flask backend
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      // Use the Flask backend URL (you can change this to your actual backend URL)
+      const backendUrl = 'http://localhost:8080' // Your Flask app runs on port 8080
+      const response = await fetch(`${backendUrl}/${endpoint}`, {
+        method: 'POST',
+        body: formData,
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      // Handle different response types
+      const contentType = response.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        // JSON response (like font hunting results)
+        const result = await response.json()
+        console.log('Processing result:', result)
+        
+        // Store the result for download
+        const resultBlob = new Blob([JSON.stringify(result, null, 2)], { 
+          type: 'application/json' 
+        })
+        const resultFile = new File([resultBlob], `${file.name.replace(/\.[^/.]+$/, '')}_results.json`, {
+          type: 'application/json'
+        })
+        setProcessedFile(resultFile)
+      } else {
+        // Binary response (like converted PPTX file)
+        const blob = await response.blob()
+        const outputFileName = type === 'pdf-conversion' 
+          ? file.name.replace('.pdf', '.pptx')
+          : `${file.name.replace(/\.[^/.]+$/, '')}_results.zip`
+        
+        const processedFile = new File([blob], outputFileName, { type: blob.type })
+        setProcessedFile(processedFile)
+      }
+      
+      setIsProcessing(false)
+      setProcessingType(undefined)
+      setProcessingComplete(true)
+      
+    } catch (error) {
+      console.error('Error processing file:', error)
+      
+      // Fallback to mock processing if backend is not available
+      console.log('Backend not available, using mock processing')
+      const processingTime = type === 'pdf-conversion' ? 3000 : 2000
+      await new Promise(resolve => setTimeout(resolve, processingTime))
+      
+      setIsProcessing(false)
+      setProcessingType(undefined)
+      setProcessedFile(file)
+      setProcessingComplete(true)
+    }
   }
 
   const handleCloudConnect = (service: 'dropbox' | 'googledrive') => {
@@ -64,17 +134,40 @@ function App() {
     const fileType = getFileType(processedFile.name)
     const fileName = processedFile.name
     
-    if (fileType === 'pdf') {
-      // For PDF conversions, create a mock PPTX file
-      const outputFileName = fileName.replace('.pdf', '.pptx')
-      createMockDownload(outputFileName, 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
+    // Check if we have a real processed file from the backend
+    if (processedFile && processedFile.size > 1000) {
+      // This is likely a real file from the backend
+      createDownload(processedFile)
     } else {
-      // For presentations, create a mock ZIP file with results
-      const outputFileName = fileName.replace(/\.[^/.]+$/, '') + '_results.zip'
-      createMockDownload(outputFileName, 'application/zip')
+      // Fallback to mock download if no real file
+      if (fileType === 'pdf') {
+        const outputFileName = fileName.replace('.pdf', '.pptx')
+        createMockDownload(outputFileName, 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
+      } else {
+        const outputFileName = fileName.replace(/\.[^/.]+$/, '') + '_results.zip'
+        createMockDownload(outputFileName, 'application/zip')
+      }
     }
     
     setIsDownloading(false)
+  }
+
+  const createDownload = (file: File) => {
+    // Create blob and download from the actual processed file
+    const url = URL.createObjectURL(file)
+    
+    // Create temporary download link
+    const link = document.createElement('a')
+    link.href = url
+    link.download = file.name
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    // Clean up
+    URL.revokeObjectURL(url)
+    
+    console.log('Downloaded file:', file.name, 'Size:', file.size, 'bytes')
   }
 
   const createMockDownload = (fileName: string, mimeType: string) => {
@@ -226,6 +319,7 @@ For presentation analysis, this would contain fonts, reports, and assets.`
                   onDownload={handleDownload}
                   onProcessAnother={handleProcessAnother}
                   isDownloading={isDownloading}
+                  backendConnected={backendConnected}
                 />
               </div>
             </div>

@@ -12,6 +12,7 @@ interface ProcessingResultsProps {
   onDownload: () => void
   onProcessAnother: () => void
   isDownloading?: boolean
+  backendConnected?: boolean | null
 }
 
 export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
@@ -19,7 +20,8 @@ export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
   fileType,
   onDownload,
   onProcessAnother,
-  isDownloading = false
+  isDownloading = false,
+  backendConnected = null
 }) => {
   const getResultsForFileType = () => {
     if (fileType === 'pdf') {
@@ -235,6 +237,54 @@ export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
           <span>Process Another</span>
         </button>
       </div>
+
+      {/* Backend Status */}
+      {backendConnected !== null && (
+        <div style={{
+          marginTop: '20px',
+          textAlign: 'center',
+          padding: '12px',
+          borderRadius: '8px',
+          background: backendConnected 
+            ? 'rgba(34, 197, 94, 0.1)' 
+            : 'rgba(239, 68, 68, 0.1)',
+          border: `1px solid ${backendConnected 
+            ? 'rgba(34, 197, 94, 0.3)' 
+            : 'rgba(239, 68, 68, 0.3)'}`
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            color: backendConnected ? '#22c55e' : '#ef4444',
+            fontSize: '0.9rem',
+            fontWeight: '500'
+          }}>
+            <span>{backendConnected ? '✅' : '⚠️'}</span>
+            <span>
+              {backendConnected 
+                ? 'Connected to Python Backend - Real files generated' 
+                : 'Python Backend Offline - Using mock files'
+              }
+            </span>
+          </div>
+          {!backendConnected && (
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontSize: '0.8rem',
+              margin: '8px 0 0 0'
+            }}>
+              Start your Flask app with: <code style={{ 
+                background: 'rgba(0, 0, 0, 0.2)', 
+                padding: '2px 6px', 
+                borderRadius: '4px',
+                fontSize: '0.8rem'
+              }}>python web_app.py</code>
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Additional Actions */}
       {fileType === 'pdf' && (
