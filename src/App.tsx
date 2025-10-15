@@ -7,11 +7,14 @@
 import React, { useState } from 'react'
 import FileUpload from './components/FileUpload'
 import AboutSection from './components/sections/AboutSection'
+import ProcessingResults from './components/ProcessingResults'
 
 function App() {
   const [activeSection, setActiveSection] = useState<'upload' | 'about'>('upload')
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingType, setProcessingType] = useState<'pdf-conversion' | 'font-hunting' | 'font-extraction' | 'presentation-processing' | undefined>()
+  const [processingComplete, setProcessingComplete] = useState(false)
+  const [processedFile, setProcessedFile] = useState<File | null>(null)
 
   const handleFileUpload = async (file: File) => {
     setIsProcessing(true)
@@ -40,11 +43,34 @@ function App() {
     
     setIsProcessing(false)
     setProcessingType(undefined)
+    setProcessedFile(file)
+    setProcessingComplete(true)
   }
 
   const handleCloudConnect = (service: 'dropbox' | 'googledrive') => {
     console.log('Connecting to:', service)
     // Here you would integrate with cloud storage APIs
+  }
+
+  const handleDownload = () => {
+    console.log('Downloading results for:', processedFile?.name)
+    // Here you would trigger the actual download
+    // For now, we'll simulate it
+    alert(`Downloading results for ${processedFile?.name}`)
+  }
+
+  const handleProcessAnother = () => {
+    setProcessingComplete(false)
+    setProcessedFile(null)
+    setIsProcessing(false)
+    setProcessingType(undefined)
+  }
+
+  const getFileType = (fileName: string): 'pdf' | 'pptx' | 'key' => {
+    const extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'))
+    if (extension === '.pdf') return 'pdf'
+    if (extension === '.key') return 'key'
+    return 'pptx'
   }
 
   return (
@@ -136,12 +162,26 @@ function App() {
 
       {/* Main Content */}
       {activeSection === 'upload' ? (
-        <FileUpload
-          onFileUpload={handleFileUpload}
-          onCloudConnect={handleCloudConnect}
-          isProcessing={isProcessing}
-          processingType={processingType}
-        />
+        <>
+          <FileUpload
+            onFileUpload={handleFileUpload}
+            onCloudConnect={handleCloudConnect}
+            isProcessing={isProcessing}
+            processingType={processingType}
+          />
+          {processingComplete && processedFile && (
+            <div style={{ padding: '0 20px' }}>
+              <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                <ProcessingResults
+                  fileName={processedFile.name}
+                  fileType={getFileType(processedFile.name)}
+                  onDownload={handleDownload}
+                  onProcessAnother={handleProcessAnother}
+                />
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <AboutSection />
       )}
