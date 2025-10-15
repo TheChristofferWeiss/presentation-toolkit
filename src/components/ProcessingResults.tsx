@@ -11,13 +11,15 @@ interface ProcessingResultsProps {
   fileType: 'pdf' | 'pptx' | 'key'
   onDownload: () => void
   onProcessAnother: () => void
+  isDownloading?: boolean
 }
 
 export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
   fileName,
   fileType,
   onDownload,
-  onProcessAnother
+  onProcessAnother,
+  isDownloading = false
 }) => {
   const getResultsForFileType = () => {
     if (fileType === 'pdf') {
@@ -166,32 +168,42 @@ export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
       }}>
         <button
           onClick={onDownload}
+          disabled={isDownloading}
           style={{
-            background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+            background: isDownloading 
+              ? 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'
+              : 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
             border: 'none',
             borderRadius: '12px',
             padding: '12px 24px',
             color: 'white',
             fontSize: '1rem',
             fontWeight: '600',
-            cursor: 'pointer',
+            cursor: isDownloading ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(74, 222, 128, 0.3)'
+            boxShadow: isDownloading 
+              ? '0 4px 12px rgba(107, 114, 128, 0.3)'
+              : '0 4px 12px rgba(74, 222, 128, 0.3)',
+            opacity: isDownloading ? 0.7 : 1
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)'
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(74, 222, 128, 0.4)'
+            if (!isDownloading) {
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(74, 222, 128, 0.4)'
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(74, 222, 128, 0.3)'
+            if (!isDownloading) {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(74, 222, 128, 0.3)'
+            }
           }}
         >
-          <span>⬇️</span>
-          <span>{results.downloadText}</span>
+          <span>{isDownloading ? '⏳' : '⬇️'}</span>
+          <span>{isDownloading ? 'Downloading...' : results.downloadText}</span>
         </button>
 
         <button
