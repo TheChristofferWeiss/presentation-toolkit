@@ -8,6 +8,7 @@ import os
 import shutil
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, url_for
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import tempfile
@@ -20,6 +21,7 @@ from pdf_converter import PDFToPPTXConverter
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
@@ -181,31 +183,33 @@ def extract_fonts():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/convert-pdf', methods=['POST'])
-def convert_pdf():
+@app.route('/pdf-to-pptx', methods=['POST'])
+def pdf_to_pptx():
     """Convert PDF to PowerPoint."""
-    data = request.json
-    filename = data.get('filename')
-    dpi = data.get('dpi', 300)
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
     
-    if not filename:
-        return jsonify({'error': 'No filename provided'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
     
+    if not allowed_file(file.filename):
+        return jsonify({'error': 'Invalid file type'}), 400
+    
+    # Save uploaded file
+    filename = secure_filename(file.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
     
-    if not os.path.exists(filepath):
-        return jsonify({'error': 'File not found'}), 404
+    dpi = request.form.get('dpi', 300, type=int)
     
     try:
         converter = PDFToPPTXConverter(output_dir='converted_pptx')
         output_file = converter.convert(filepath, dpi=dpi)
         converter.cleanup_temp()
         
-        return jsonify({
-            'success': True,
-            'output_file': output_file,
-            'filename': Path(output_file).name
-        })
+        # Return the actual PPTX file as binary download
+        return send_file(output_file, as_attachment=True, download_name=Path(output_file).name)
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500

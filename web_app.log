@@ -139,3 +139,86 @@ Press CTRL+C to quit
 127.0.0.1 - - [15/Oct/2025 11:07:38] "POST /pdf-to-pptx HTTP/1.1" 404 -
 127.0.0.1 - - [15/Oct/2025 11:16:15] "GET /health HTTP/1.1" 200 -
 127.0.0.1 - - [15/Oct/2025 11:16:19] "POST /pdf-to-pptx HTTP/1.1" 404 -
+127.0.0.1 - - [15/Oct/2025 11:25:09] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [15/Oct/2025 11:25:14] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [15/Oct/2025 11:25:54] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [15/Oct/2025 11:26:50] "GET /health HTTP/1.1" 200 -
+ * Detected change in '/Users/christoffer/presentation-toolkit/web_app.py', reloading
+
+======================================================================
+🎯 Presentation Toolkit - Web Interface
+======================================================================
+
+📍 Starting web server...
+
+🌐 Open your browser and go to:
+
+   http://localhost:8080
+
+⚙️  Press CTRL+C to stop the server
+
+======================================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 142-035-893
+ * Detected change in '/Users/christoffer/presentation-toolkit/web_app.py', reloading
+
+======================================================================
+🎯 Presentation Toolkit - Web Interface
+======================================================================
+
+📍 Starting web server...
+
+🌐 Open your browser and go to:
+
+   http://localhost:8080
+
+⚙️  Press CTRL+C to stop the server
+
+======================================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 142-035-893
+127.0.0.1 - - [15/Oct/2025 11:27:18] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [15/Oct/2025 11:27:23] "POST /pdf-to-pptx HTTP/1.1" 404 -
+ * Detected change in '/Users/christoffer/presentation-toolkit/web_app.py', reloading
+
+======================================================================
+🎯 Presentation Toolkit - Web Interface
+======================================================================
+
+📍 Starting web server...
+
+🌐 Open your browser and go to:
+
+   http://localhost:8080
+
+⚙️  Press CTRL+C to stop the server
+
+======================================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 142-035-893
+ * Detected change in '/Users/christoffer/presentation-toolkit/web_app.py', reloading
+
+======================================================================
+🎯 Presentation Toolkit - Web Interface
+======================================================================
+
+📍 Starting web server...
+
+🌐 Open your browser and go to:
+
+   http://localhost:8080
+
+⚙️  Press CTRL+C to stop the server
+
+======================================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 142-035-893
+127.0.0.1 - - [15/Oct/2025 11:29:18] "POST /pdf-to-pptx HTTP/1.1" 200 -
