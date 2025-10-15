@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+*.pyc
+
+# Development
+node_modules/
+.env
+.env.local
+.env.production
+
+# Build
+dist/
+build/
+
+# Outputs
+extracted_fonts/
+converted_pptx/
+hunted_fonts/
+uploads/
+temp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# macOS
+.DS_Store

@@ -1,0 +1,137 @@
+
+======================================================================
+🎯 Presentation Toolkit - Web Interface
+======================================================================
+
+📍 Starting web server...
+
+🌐 Open your browser and go to:
+
+   http://localhost:8080
+
+⚙️  Press CTRL+C to stop the server
+
+======================================================================
+
+ * Serving Flask app 'web_app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.5.0.2:8080
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 142-035-893
+127.0.0.1 - - [14/Oct/2025 11:12:58] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [14/Oct/2025 11:12:59] "GET / HTTP/1.1" 200 -
+ * Detected change in '/Users/christoffer/presentation-toolkit/font_extractor.py', reloading
+
+======================================================================
+🎯 Presentation Toolkit - Web Interface
+======================================================================
+
+📍 Starting web server...
+
+🌐 Open your browser and go to:
+
+   http://localhost:8080
+
+⚙️  Press CTRL+C to stop the server
+
+======================================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 142-035-893
+127.0.0.1 - - [14/Oct/2025 11:13:12] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Oct/2025 11:13:16] "POST /upload HTTP/1.1" 200 -
+127.0.0.1 - - [14/Oct/2025 11:13:17] "POST /extract-fonts HTTP/1.1" 200 -
+127.0.0.1 - - [14/Oct/2025 11:13:37] "POST /hunt-fonts HTTP/1.1" 200 -
+127.0.0.1 - - [14/Oct/2025 11:13:47] "GET /download-fonts/9.45_-_Japanese_Chrono_Trigger_Rethinking_Time_and_Longevity HTTP/1.1" 200 -
+127.0.0.1 - - [14/Oct/2025 11:13:51] "GET /view-report/9.45_-_Japanese_Chrono_Trigger_Rethinking_Time_and_Longevity HTTP/1.1" 200 -
+ * Detected change in '/Users/christoffer/presentation-toolkit/examples.py', reloading
+
+======================================================================
+🎯 Presentation Toolkit - Web Interface
+======================================================================
+
+📍 Starting web server...
+
+🌐 Open your browser and go to:
+
+   http://localhost:8080
+
+⚙️  Press CTRL+C to stop the server
+
+======================================================================
+
+
+🔍 Hunting for 22 fonts across 10 repositories...
+
+[1/22] Searching for 'Arial'...
+  ✅ Found on Multiple Sources
+[2/22] Searching for 'Calibri'...
+  ✅ Found on Multiple Sources
+[3/22] Searching for 'DM Sans'...
+  ✅ Found and downloaded from Google Fonts
+[4/22] Searching for 'Garamond'...
+  ✅ Found and downloaded from Google Fonts
+[5/22] Searching for 'Georgia'...
+  ✅ Found and downloaded from Google Fonts
+[6/22] Searching for 'Helvetica'...
+  ✅ Found on Multiple Sources
+[7/22] Searching for 'Hiragino Sans'...
+  ✅ Found on Multiple Sources
+[8/22] Searching for 'Lato'...
+  ✅ Found and downloaded from Google Fonts
+[9/22] Searching for 'Montserrat'...
+  ✅ Found and downloaded from Google Fonts
+[10/22] Searching for 'Open Sans'...
+  ✅ Found and downloaded from Google Fonts
+[11/22] Searching for 'Palatino'...
+  ✅ Found on Multiple Sources
+[12/22] Searching for 'PingFang SC'...
+  ✅ Found on Multiple Sources
+[13/22] Searching for 'Roboto'...
+  ✅ Found and downloaded from Google Fonts
+[14/22] Searching for 'STSong'...
+  ✅ Found on Multiple Sources
+[15/22] Searching for 'Source Sans Pro'...
+  ✅ Found on Multiple Sources
+[16/22] Searching for 'Tahoma'...
+  ✅ Found on Multiple Sources
+[17/22] Searching for 'Times New Roman'...
+  ✅ Found on Multiple Sources
+[18/22] Searching for 'Trebuchet MS'...
+  ✅ Found on Multiple Sources
+[19/22] Searching for 'Verdana'...
+  ✅ Found on Multiple Sources
+[20/22] Searching for 'Yu Gothic'...
+  ✅ Found on Multiple Sources
+[21/22] Searching for 'YuGothic'...
+  ✅ Found on Multiple Sources
+[22/22] Searching for '游ゴシック'...
+  ✅ Found on Multiple Sources
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 142-035-893
+ * Detected change in '/Users/christoffer/presentation-toolkit/font_extractor.py', reloading
+
+======================================================================
+🎯 Presentation Toolkit - Web Interface
+======================================================================
+
+📍 Starting web server...
+
+🌐 Open your browser and go to:
+
+   http://localhost:8080
+
+⚙️  Press CTRL+C to stop the server
+
+======================================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 142-035-893

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentation Toolkit - Font Hunter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.3em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .file-info h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .action-buttons {
+            display: none;
+            margin-top: 30px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons.show {
+            display: flex;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-tertiary {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .font-list {
+            margin-top: 15px;
+        }
+
+        .font-item {
+            background: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .download-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .api-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: {% if not api_key_configured %}block{% else %}none{% endif %};
+        }
+
+        .api-warning strong {
+            color: #856404;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #155724;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Presentation Toolkit</h1>
+            <p>Hunt for fonts, extract embedded fonts, and convert PDFs - all in one place</p>
+        </div>
+
+        <div class="card">
+            <div class="api-warning">
+                <strong>⚠️ Notice:</strong> Google Fonts API key not configured. Auto-download will not work. 
+                Add your API key to the <code>.env</code> file.
+            </div>
+
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drop your file here or click to browse</div>
+                <div class="upload-subtext">Supported formats: .pptx, .key, .pdf (Max 100MB)</div>
+            </div>
+
+            <input type="file" id="fileInput" accept=".pptx,.key,.pdf">
+
+            <div class="file-info" id="fileInfo">
+                <h3>✅ File uploaded successfully!</h3>
+                <p id="fileName"></p>
+            </div>
+
+            <div class="action-buttons" id="actionButtons">
+                <button class="btn btn-primary" id="huntBtn">
+                    🔍 Hunt for Fonts
+                </button>
+                <button class="btn btn-secondary" id="extractBtn">
+                    📦 Extract Embedded Fonts
+                </button>
+                <button class="btn btn-tertiary" id="convertBtn" style="display: none;">
+                    📄 Convert to PowerPoint
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your file...</p>
+            </div>
+
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFile = null;
+        let uploadedFilename = null;
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const actionButtons = document.getElementById('actionButtons');
+        const huntBtn = document.getElementById('huntBtn');
+        const extractBtn = document.getElementById('extractBtn');
+        const convertBtn = document.getElementById('convertBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+
+        // File upload handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFileSelect(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFileSelect(file);
+        });
+
+        async function handleFileSelect(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    uploadedFile = file;
+                    uploadedFilename = data.filename;
+                    fileName.textContent = `File: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                    fileInfo.style.display = 'block';
+                    actionButtons.classList.add('show');
+
+                    // Show convert button only for PDFs
+                    if (file.name.toLowerCase().endsWith('.pdf')) {
+                        convertBtn.style.display = 'block';
+                        huntBtn.style.display = 'none';
+                        extractBtn.style.display = 'none';
+                    } else {
+                        convertBtn.style.display = 'none';
+                        huntBtn.style.display = 'block';
+                        extractBtn.style.display = 'block';
+                    }
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Upload failed: ' + error);
+            }
+        }
+
+        // Hunt for fonts
+        huntBtn.addEventListener('click', async () => {
+            if (!uploadedFilename) return;
+
+            loading.classList.add('show');
+            results.classList.remove('show');
+            results.innerHTML = '';
+
+            try {
+                const response = await fetch('/hunt-fonts', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        filename: uploadedFilename,
+                        project_name: uploadedFilename.replace(/\.[^/.]+$/, '')
+                    })
+                });
+
+                const data = await response.json();
+                loading.classList.remove('show');
+
+                if (data.success) {
+                    displayHuntResults(data);
+                } else {
+                    results.innerHTML = `<div class="error-message">${data.error}</div>`;
+                    results.classList.add('show');
+                }
+            } catch (error) {
+                loading.classList.remove('show');
+                results.innerHTML = `<div class="error-message">Error: ${error}</div>`;
+                results.classList.add('show');
+            }
+        });
+
+        // Extract fonts
+        extractBtn.addEventListener('click', async () => {
+            if (!uploadedFilename) return;
+
+            loading.classList.add('show');
+            results.classList.remove('show');
+            results.innerHTML = '';
+
+            try {
+                const response = await fetch('/extract-fonts', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({filename: uploadedFilename})
+                });
+
+                const data = await response.json();
+                loading.classList.remove('show');
+
+                if (data.success) {
+                    displayExtractResults(data);
+                } else {
+                    results.innerHTML = `<div class="error-message">${data.error}</div>`;
+                    results.classList.add('show');
+                }
+            } catch (error) {
+                loading.classList.remove('show');
+                results.innerHTML = `<div class="error-message">Error: ${error}</div>`;
+                results.classList.add('show');
+            }
+        });
+
+        // Convert PDF
+        convertBtn.addEventListener('click', async () => {
+            if (!uploadedFilename) return;
+
+            loading.classList.add('show');
+            results.classList.remove('show');
+            results.innerHTML = '';
+
+            try {
+                const response = await fetch('/convert-pdf', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        filename: uploadedFilename,
+                        dpi: 300
+                    })
+                });
+
+                const data = await response.json();
+                loading.classList.remove('show');
+
+                if (data.success) {
+                    displayConvertResults(data);
+                } else {
+                    results.innerHTML = `<div class="error-message">${data.error}</div>`;
+                    results.classList.add('show');
+                }
+            } catch (error) {
+                loading.classList.remove('show');
+                results.innerHTML = `<div class="error-message">Error: ${error}</div>`;
+                results.classList.add('show');
+            }
+        });
+
+        function displayHuntResults(data) {
+            const projectName = uploadedFilename.replace(/\.[^/.]+$/, '');
+            
+            results.innerHTML = `
+                <div class="result-card">
+                    <div class="result-title">🎯 Font Hunt Results</div>
+                    <div class="success-message">
+                        Found ${data.fonts.length} fonts in your presentation!
+                    </div>
+                    
+                    <div class="stat-grid">
+                        <div class="stat">
+                            <span class="stat-number">${data.results.google_fonts_downloaded}</span>
+                            <div class="stat-label">✅ Auto-Downloaded</div>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">${data.results.free_fonts_found}</span>
+                            <div class="stat-label">🆓 Free Fonts Found</div>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">${data.results.commercial_fonts}</span>
+                            <div class="stat-label">💰 Commercial Fonts</div>
+                        </div>
+                    </div>
+
+                    <div class="download-section">
+                        <strong>📥 Download Your Results:</strong><br><br>
+                        <a href="/view-report/${projectName}" target="_blank" class="download-btn">
+                            📊 View Full HTML Report
+                        </a>
+                        ${data.results.google_fonts_downloaded > 0 ? `
+                            <a href="/download-fonts/${projectName}" class="download-btn">
+                                📦 Download Fonts (${data.results.google_fonts_downloaded} files)
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            results.classList.add('show');
+        }
+
+        function displayExtractResults(data) {
+            results.innerHTML = `
+                <div class="result-card">
+                    <div class="result-title">📦 Font Extraction Results</div>
+                    
+                    <div class="stat-grid">
+                        <div class="stat">
+                            <span class="stat-number">${data.embedded_fonts}</span>
+                            <div class="stat-label">Embedded Fonts</div>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">${data.referenced_fonts}</span>
+                            <div class="stat-label">Referenced Fonts</div>
+                        </div>
+                    </div>
+
+                    ${data.embedded_fonts > 0 ? `
+                        <div class="success-message">
+                            ✅ Extracted ${data.embedded_fonts} embedded font(s) to: <code>${data.output_folder}</code>
+                        </div>
+                    ` : `
+                        <div class="error-message">
+                            ⚠️ No embedded fonts found. Try "Hunt for Fonts" to find and download them!
+                        </div>
+                    `}
+
+                    ${data.font_names.length > 0 ? `
+                        <div style="margin-top: 20px;">
+                            <strong>Referenced Fonts:</strong>
+                            <div class="font-list">
+                                ${data.font_names.map(font => `<div class="font-item">${font}</div>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            results.classList.add('show');
+        }
+
+        function displayConvertResults(data) {
+            results.innerHTML = `
+                <div class="result-card">
+                    <div class="result-title">📄 PDF Conversion Complete</div>
+                    <div class="success-message">
+                        ✅ Successfully converted PDF to PowerPoint!
+                    </div>
+                    <div class="download-section">
+                        <a href="/download-converted/${data.filename}" class="download-btn">
+                            📥 Download PowerPoint File
+                        </a>
+                    </div>
+                </div>
+            `;
+            results.classList.add('show');
+        }
+    </script>
+</body>
+</html>
+
+
