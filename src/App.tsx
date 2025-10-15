@@ -15,6 +15,7 @@ function App() {
   const [processingType, setProcessingType] = useState<'pdf-conversion' | 'font-hunting' | 'font-extraction' | 'presentation-processing' | undefined>()
   const [processingComplete, setProcessingComplete] = useState(false)
   const [processedFile, setProcessedFile] = useState<File | null>(null)
+  const [originalFileName, setOriginalFileName] = useState<string | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
   const [backendConnected, setBackendConnected] = useState<boolean | null>(null)
 
@@ -58,6 +59,9 @@ function App() {
     }
     
     try {
+      // Store original file name for fallback
+      setOriginalFileName(file.name)
+      
       // Send file to Python Flask backend
       const formData = new FormData()
       formData.append('file', file)
@@ -95,7 +99,12 @@ function App() {
           ? file.name.replace('.pdf', '.pptx')
           : `${file.name.replace(/\.[^/.]+$/, '')}_results.zip`
         
-        const processedFile = new File([blob], outputFileName, { type: blob.type })
+        // Create a proper File object with the correct MIME type
+        const processedFile = new File([blob], outputFileName, { 
+          type: blob.type || (type === 'pdf-conversion' ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation' : 'application/zip')
+        })
+        
+        console.log('Processed file:', processedFile.name, 'Size:', processedFile.size, 'Type:', processedFile.type)
         setProcessedFile(processedFile)
       }
       
@@ -113,7 +122,8 @@ function App() {
       
       setIsProcessing(false)
       setProcessingType(undefined)
-      setProcessedFile(file)
+      // Don't set the original file as processed - let the mock download handle it
+      setProcessedFile(null)
       setProcessingComplete(true)
     }
   }
@@ -124,27 +134,28 @@ function App() {
   }
 
   const handleDownload = async () => {
-    if (!processedFile || isDownloading) return
+    if (isDownloading) return
     
     setIsDownloading(true)
     
     // Simulate download preparation time
     await new Promise(resolve => setTimeout(resolve, 500))
     
-    const fileType = getFileType(processedFile.name)
-    const fileName = processedFile.name
-    
     // Check if we have a real processed file from the backend
     if (processedFile && processedFile.size > 1000) {
-      // This is likely a real file from the backend
+      // This is likely a real processed file from the backend
+      console.log('Downloading real processed file:', processedFile.name, 'Size:', processedFile.size)
       createDownload(processedFile)
     } else {
       // Fallback to mock download if no real file
+      const originalName = originalFileName || 'document.pdf'
+      const fileType = getFileType(originalName)
+      
       if (fileType === 'pdf') {
-        const outputFileName = fileName.replace('.pdf', '.pptx')
+        const outputFileName = originalName.replace('.pdf', '.pptx')
         createMockDownload(outputFileName, 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
       } else {
-        const outputFileName = fileName.replace(/\.[^/.]+$/, '') + '_results.zip'
+        const outputFileName = originalName.replace(/\.[^/.]+$/, '') + '_results.zip'
         createMockDownload(outputFileName, 'application/zip')
       }
     }
@@ -202,6 +213,7 @@ For presentation analysis, this would contain fonts, reports, and assets.`
   const handleProcessAnother = () => {
     setProcessingComplete(false)
     setProcessedFile(null)
+    setOriginalFileName(null)
     setIsProcessing(false)
     setProcessingType(undefined)
     setIsDownloading(false)
@@ -310,12 +322,12 @@ For presentation analysis, this would contain fonts, reports, and assets.`
             isProcessing={isProcessing}
             processingType={processingType}
           />
-          {processingComplete && processedFile && (
+          {processingComplete && (processedFile || originalFileName) && (
             <div style={{ padding: '0 20px' }}>
               <div style={{ maxWidth: '800px', margin: '0 auto' }}>
                 <ProcessingResults
-                  fileName={processedFile.name}
-                  fileType={getFileType(processedFile.name)}
+                  fileName={originalFileName || processedFile?.name || 'Unknown'}
+                  fileType={getFileType(originalFileName || processedFile?.name || 'document.pdf')}
                   onDownload={handleDownload}
                   onProcessAnother={handleProcessAnother}
                   isDownloading={isDownloading}

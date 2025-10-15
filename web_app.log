@@ -135,3 +135,5 @@ Press CTRL+C to quit
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 142-035-893
+127.0.0.1 - - [15/Oct/2025 11:07:28] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [15/Oct/2025 11:07:38] "POST /pdf-to-pptx HTTP/1.1" 404 -
