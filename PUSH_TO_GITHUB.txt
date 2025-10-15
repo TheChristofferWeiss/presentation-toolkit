@@ -1,0 +1,35 @@
+==========================================
+  COPY & PASTE THESE COMMANDS
+==========================================
+
+1. CREATE GITHUB REPO FIRST:
+   Go to: https://github.com/new
+   Name: presentation-toolkit
+   Do NOT initialize with README/gitignore
+   Click "Create repository"
+
+2. THEN RUN THESE COMMANDS:
+   (Replace YOUR_USERNAME with your GitHub username)
+
+cd /Users/christoffer/presentation-toolkit
+git remote add origin https://github.com/YOUR_USERNAME/presentation-toolkit.git
+git push -u origin main
+
+==========================================
+  EXAMPLE (if username is "christoffer"):
+==========================================
+
+git remote add origin https://github.com/christoffer/presentation-toolkit.git
+git push -u origin main
+
+==========================================
+  VERCEL ENVIRONMENT VARIABLES
+==========================================
+
+Copy these into Vercel when deploying:
+
+VITE_SUPABASE_URL=https://gsiefiffawsvabrgnmaf.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdzaWVmaWZmYXdzdmFicmdubWFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NTU3ODcsImV4cCI6MjA3NjAzMTc4N30.78-ebdMYpWIBzEfQ6wP8qnMEoKEz9SSvzN6i63exgnM
+VITE_SUPABASE_PROJECT_ID=gsiefiffawsvabrgnmaf
+
+==========================================
