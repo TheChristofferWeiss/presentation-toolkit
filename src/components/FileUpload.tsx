@@ -10,12 +10,14 @@ interface FileUploadProps {
   onFileUpload: (file: File) => void
   onCloudConnect: (service: 'dropbox' | 'googledrive') => void
   isProcessing: boolean
+  processingType?: 'pdf-conversion' | 'font-hunting' | 'font-extraction' | 'presentation-processing'
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
   onFileUpload,
   onCloudConnect,
-  isProcessing
+  isProcessing,
+  processingType
 }) => {
   const [dragActive, setDragActive] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
@@ -88,13 +90,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           }}>
             🎬 Presentation Toolkit
           </h1>
-          <p style={{
-            fontSize: '1.2rem',
-            color: 'rgba(255, 255, 255, 0.8)',
-            margin: 0
-          }}>
-            Upload your presentation files to get started
-          </p>
+        <p style={{
+          fontSize: '1.2rem',
+          color: 'rgba(255, 255, 255, 0.8)',
+          margin: 0
+        }}>
+          Upload PDFs to convert to PowerPoint, or presentations for font analysis
+        </p>
         </div>
 
         {/* File Upload Area */}
@@ -130,10 +132,24 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           {isProcessing ? (
             <div>
               <h3 style={{ color: 'white', fontSize: '1.5rem', margin: '0 0 10px 0' }}>
-                Processing your file...
+                {processingType === 'pdf-conversion' 
+                  ? 'Converting PDF to PowerPoint...'
+                  : processingType === 'font-hunting'
+                  ? 'Hunting for fonts...'
+                  : processingType === 'font-extraction'
+                  ? 'Extracting fonts...'
+                  : 'Processing your file...'
+                }
               </h3>
               <p style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                Please wait while we analyze your presentation
+                {processingType === 'pdf-conversion'
+                  ? 'Converting each page to a slide with 16:9 aspect ratio'
+                  : processingType === 'font-hunting'
+                  ? 'Searching across 10 free font repositories'
+                  : processingType === 'font-extraction'
+                  ? 'Extracting embedded fonts from your presentation'
+                  : 'Please wait while we analyze your presentation'
+                }
               </p>
             </div>
           ) : uploadedFile ? (
@@ -151,7 +167,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 Drop files here or click to browse
               </h3>
               <p style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                Supports .pptx, .key, and .pdf files
+                PDFs → PowerPoint conversion | Presentations → Font analysis
               </p>
             </div>
           )}
@@ -270,30 +286,104 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           }}>
             🚀 What happens next?
           </h3>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: '16px',
-            color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: '0.9rem'
-          }}>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🔍</div>
-              <div>Font Analysis</div>
+          {uploadedFile ? (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '16px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '0.9rem'
+            }}>
+              {uploadedFile.name.toLowerCase().endsWith('.pdf') ? (
+                // PDF-specific workflow
+                <>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📄</div>
+                    <div>PDF Analysis</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🖼️</div>
+                    <div>Page to Image</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📊</div>
+                    <div>Create Slides</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🎯</div>
+                    <div>16:9 Format</div>
+                  </div>
+                </>
+              ) : uploadedFile.name.toLowerCase().endsWith('.pptx') || uploadedFile.name.toLowerCase().endsWith('.key') ? (
+                // Presentation-specific workflow
+                <>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🔍</div>
+                    <div>Font Analysis</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📦</div>
+                    <div>Font Extraction</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🎬</div>
+                    <div>Web Conversion</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📊</div>
+                    <div>Report Generation</div>
+                  </div>
+                </>
+              ) : (
+                // Default workflow
+                <>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🔍</div>
+                    <div>File Analysis</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>⚙️</div>
+                    <div>Processing</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📊</div>
+                    <div>Results</div>
+                  </div>
+                </>
+              )}
             </div>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📦</div>
-              <div>Font Extraction</div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '16px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '0.9rem'
+            }}>
+              <div style={{
+                background: 'rgba(76, 175, 80, 0.2)',
+                borderRadius: '8px',
+                padding: '12px',
+                border: '2px solid rgba(76, 175, 80, 0.3)'
+              }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📄</div>
+                <div style={{ fontWeight: '600' }}>PDF → PPTX</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Primary Feature</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🔍</div>
+                <div>Font Hunting</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📦</div>
+                <div>Font Extraction</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🎬</div>
+                <div>Web Presentations</div>
+              </div>
             </div>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🎬</div>
-              <div>Web Conversion</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📊</div>
-              <div>Report Generation</div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

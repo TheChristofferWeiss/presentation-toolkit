@@ -11,17 +11,35 @@ import AboutSection from './components/sections/AboutSection'
 function App() {
   const [activeSection, setActiveSection] = useState<'upload' | 'about'>('upload')
   const [isProcessing, setIsProcessing] = useState(false)
+  const [processingType, setProcessingType] = useState<'pdf-conversion' | 'font-hunting' | 'font-extraction' | 'presentation-processing' | undefined>()
 
   const handleFileUpload = async (file: File) => {
     setIsProcessing(true)
     
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // Determine processing type based on file extension
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
+    let type: 'pdf-conversion' | 'font-hunting' | 'font-extraction' | 'presentation-processing'
+    
+    if (fileExtension === '.pdf') {
+      type = 'pdf-conversion'
+      setProcessingType('pdf-conversion')
+    } else if (fileExtension === '.pptx' || fileExtension === '.key') {
+      type = 'presentation-processing'
+      setProcessingType('presentation-processing')
+    } else {
+      type = 'presentation-processing'
+      setProcessingType('presentation-processing')
+    }
+    
+    // Simulate processing time (longer for PDF conversion)
+    const processingTime = type === 'pdf-conversion' ? 3000 : 2000
+    await new Promise(resolve => setTimeout(resolve, processingTime))
     
     // Here you would integrate with your actual processing pipeline
-    console.log('Processing file:', file.name)
+    console.log('Processing file:', file.name, 'Type:', type)
     
     setIsProcessing(false)
+    setProcessingType(undefined)
   }
 
   const handleCloudConnect = (service: 'dropbox' | 'googledrive') => {
@@ -122,6 +140,7 @@ function App() {
           onFileUpload={handleFileUpload}
           onCloudConnect={handleCloudConnect}
           isProcessing={isProcessing}
+          processingType={processingType}
         />
       ) : (
         <AboutSection />
