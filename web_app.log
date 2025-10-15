@@ -137,3 +137,5 @@ Press CTRL+C to quit
  * Debugger PIN: 142-035-893
 127.0.0.1 - - [15/Oct/2025 11:07:28] "GET /health HTTP/1.1" 200 -
 127.0.0.1 - - [15/Oct/2025 11:07:38] "POST /pdf-to-pptx HTTP/1.1" 404 -
+127.0.0.1 - - [15/Oct/2025 11:16:15] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [15/Oct/2025 11:16:19] "POST /pdf-to-pptx HTTP/1.1" 404 -

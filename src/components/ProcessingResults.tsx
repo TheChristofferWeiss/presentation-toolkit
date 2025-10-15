@@ -13,6 +13,7 @@ interface ProcessingResultsProps {
   onProcessAnother: () => void
   isDownloading?: boolean
   backendConnected?: boolean | null
+  hasProcessedFile?: boolean
 }
 
 export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
@@ -21,7 +22,8 @@ export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
   onDownload,
   onProcessAnother,
   isDownloading = false,
-  backendConnected = null
+  backendConnected = null,
+  hasProcessedFile = false
 }) => {
   const getResultsForFileType = () => {
     if (fileType === 'pdf') {
@@ -170,9 +172,9 @@ export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
       }}>
         <button
           onClick={onDownload}
-          disabled={isDownloading}
+          disabled={isDownloading || !hasProcessedFile}
           style={{
-            background: isDownloading 
+            background: (isDownloading || !hasProcessedFile)
               ? 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'
               : 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
             border: 'none',
@@ -181,31 +183,35 @@ export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
             color: 'white',
             fontSize: '1rem',
             fontWeight: '600',
-            cursor: isDownloading ? 'not-allowed' : 'pointer',
+            cursor: (isDownloading || !hasProcessedFile) ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             transition: 'all 0.3s ease',
-            boxShadow: isDownloading 
+            boxShadow: (isDownloading || !hasProcessedFile)
               ? '0 4px 12px rgba(107, 114, 128, 0.3)'
               : '0 4px 12px rgba(74, 222, 128, 0.3)',
-            opacity: isDownloading ? 0.7 : 1
+            opacity: (isDownloading || !hasProcessedFile) ? 0.7 : 1
           }}
           onMouseEnter={(e) => {
-            if (!isDownloading) {
+            if (!isDownloading && hasProcessedFile) {
               e.currentTarget.style.transform = 'translateY(-2px)'
               e.currentTarget.style.boxShadow = '0 6px 16px rgba(74, 222, 128, 0.4)'
             }
           }}
           onMouseLeave={(e) => {
-            if (!isDownloading) {
+            if (!isDownloading && hasProcessedFile) {
               e.currentTarget.style.transform = 'translateY(0)'
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(74, 222, 128, 0.3)'
             }
           }}
         >
           <span>{isDownloading ? '⏳' : '⬇️'}</span>
-          <span>{isDownloading ? 'Downloading...' : results.downloadText}</span>
+          <span>
+            {isDownloading ? 'Downloading...' : 
+             !hasProcessedFile ? 'No File Available' : 
+             results.downloadText}
+          </span>
         </button>
 
         <button
