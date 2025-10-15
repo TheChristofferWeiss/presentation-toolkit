@@ -19,20 +19,28 @@ function App() {
   const [isDownloading, setIsDownloading] = useState(false)
   const [backendConnected, setBackendConnected] = useState<boolean | null>(null)
 
+  const checkBackendConnection = async () => {
+    try {
+      console.log('Checking backend connection...')
+      const response = await fetch('http://localhost:8080/health', {
+        method: 'GET',
+      })
+      console.log('Backend health check response:', response.status)
+      if (response.ok) {
+        setBackendConnected(true)
+        console.log('Backend is connected!')
+      } else {
+        setBackendConnected(false)
+        console.log('Backend health check failed')
+      }
+    } catch (error) {
+      console.log('Backend connection failed:', error)
+      setBackendConnected(false)
+    }
+  }
+
   // Check backend connection on component mount
   React.useEffect(() => {
-    const checkBackendConnection = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/health', {
-          method: 'GET',
-          mode: 'no-cors', // Avoid CORS issues for health check
-        })
-        setBackendConnected(true)
-      } catch (error) {
-        setBackendConnected(false)
-      }
-    }
-    
     checkBackendConnection()
   }, [])
 
@@ -76,21 +84,31 @@ function App() {
       
       // Use the Flask backend URL (you can change this to your actual backend URL)
       const backendUrl = 'http://localhost:8080' // Your Flask app runs on port 8080
+      console.log(`Sending file to: ${backendUrl}/${endpoint}`)
+      console.log('File details:', { name: file.name, size: file.size, type: file.type })
+      
       const response = await fetch(`${backendUrl}/${endpoint}`, {
         method: 'POST',
         body: formData,
       })
       
+      console.log('Response status:', response.status)
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorText = await response.text()
+        console.error('Backend error response:', errorText)
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
       }
       
       // Handle different response types
       const contentType = response.headers.get('content-type')
+      console.log('Response content type:', contentType)
+      
       if (contentType && contentType.includes('application/json')) {
         // JSON response (like font hunting results)
         const result = await response.json()
-        console.log('Processing result:', result)
+        console.log('Processing result (JSON):', result)
         
         // Store the result for download
         const resultBlob = new Blob([JSON.stringify(result, null, 2)], { 
@@ -99,10 +117,13 @@ function App() {
         const resultFile = new File([resultBlob], `${file.name.replace(/\.[^/.]+$/, '')}_results.json`, {
           type: 'application/json'
         })
+        console.log('Created JSON result file:', resultFile.name, 'Size:', resultFile.size)
         setProcessedFile(resultFile)
       } else {
         // Binary response (like converted PPTX file)
         const blob = await response.blob()
+        console.log('Received blob:', { size: blob.size, type: blob.type })
+        
         const outputFileName = type === 'pdf-conversion' 
           ? file.name.replace('.pdf', '.pptx')
           : `${file.name.replace(/\.[^/.]+$/, '')}_results.zip`
@@ -112,7 +133,7 @@ function App() {
           type: blob.type || (type === 'pdf-conversion' ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation' : 'application/zip')
         })
         
-        console.log('Processed file:', processedFile.name, 'Size:', processedFile.size, 'Type:', processedFile.type)
+        console.log('Created processed file:', processedFile.name, 'Size:', processedFile.size, 'Type:', processedFile.type)
         setProcessedFile(processedFile)
       }
       
@@ -286,6 +307,8 @@ function App() {
             onCloudConnect={handleCloudConnect}
             isProcessing={isProcessing}
             processingType={processingType}
+            backendConnected={backendConnected}
+            onCheckBackend={checkBackendConnection}
           />
           {processingComplete && (processedFile || originalFileName) && (
             <div style={{ padding: '0 20px' }}>
