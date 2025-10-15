@@ -19,10 +19,15 @@ function App() {
   const [isDownloading, setIsDownloading] = useState(false)
   const [backendConnected, setBackendConnected] = useState<boolean | null>(null)
 
+  const getBackendUrl = () => {
+    const envUrl = (import.meta as any).env?.VITE_BACKEND_URL as string | undefined
+    return envUrl && envUrl.trim().length > 0 ? envUrl : 'http://localhost:8080'
+  }
+
   const checkBackendConnection = async () => {
     try {
       console.log('Checking backend connection...')
-      const response = await fetch('http://localhost:8080/health', {
+      const response = await fetch(`${getBackendUrl()}/health`, {
         method: 'GET',
       })
       console.log('Backend health check response:', response.status)
@@ -82,8 +87,8 @@ function App() {
       const formData = new FormData()
       formData.append('file', file)
       
-      // Use the Flask backend URL (you can change this to your actual backend URL)
-      const backendUrl = 'http://localhost:8080' // Your Flask app runs on port 8080
+      // Resolve backend URL from env (VITE_BACKEND_URL) with localhost fallback
+      const backendUrl = getBackendUrl()
       console.log(`Sending file to: ${backendUrl}/${endpoint}`)
       console.log('File details:', { name: file.name, size: file.size, type: file.type })
       

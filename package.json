@@ -1,29 +1,59 @@
 {
   "name": "presentation-toolkit",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Event tech toolkit for presentation processing, font hunting, and web-based presentation rendering",
+  "main": "index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:edge-functions": "deno test supabase/functions/",
+    "test:animations": "vitest --run src/lib/presentation-animations.test.ts",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "canvas": "^2.11.2",
-    "next": "^14.2.33",
-    "pdfjs-dist": "^4.3.136",
-    "pptxgenjs": "^3.12.0",
-    "react": "^18",
-    "react-dom": "^18"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "gsap": "^3.13.0",
+    "@supabase/supabase-js": "^2.75.0",
+    "jszip": "^3.10.1",
+    "fast-xml-parser": "^5.3.0",
+    "opentype.js": "^1.3.4",
+    "pdfjs-dist": "^5.4.296"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.3",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vitest": "^1.4.0"
+  },
+  "keywords": [
+    "presentation",
+    "pptx",
+    "keynote",
+    "font-hunting",
+    "event-tech",
+    "powerpoint",
+    "animation",
+    "gsap",
+    "supabase"
+  ],
+  "author": "Event Tech Producer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/presentation-toolkit.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
