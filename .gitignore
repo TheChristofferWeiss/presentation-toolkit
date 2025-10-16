@@ -58,3 +58,6 @@ out/
 # macOS
 .DS_Store
 
+*.pptx
+*.pdf
+test_*
