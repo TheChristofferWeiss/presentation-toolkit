@@ -11,19 +11,13 @@ interface ProcessingResultsProps {
   fileType: 'pdf' | 'pptx' | 'key'
   onDownload: () => void
   onProcessAnother: () => void
-  isDownloading?: boolean
-  backendConnected?: boolean | null
-  hasProcessedFile?: boolean
 }
 
 export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
   fileName,
   fileType,
   onDownload,
-  onProcessAnother,
-  isDownloading = false,
-  backendConnected = null,
-  hasProcessedFile = false
+  onProcessAnother
 }) => {
   const getResultsForFileType = () => {
     if (fileType === 'pdf') {
@@ -172,46 +166,32 @@ export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
       }}>
         <button
           onClick={onDownload}
-          disabled={isDownloading || !hasProcessedFile}
           style={{
-            background: (isDownloading || !hasProcessedFile)
-              ? 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'
-              : 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+            background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
             border: 'none',
             borderRadius: '12px',
             padding: '12px 24px',
             color: 'white',
             fontSize: '1rem',
             fontWeight: '600',
-            cursor: (isDownloading || !hasProcessedFile) ? 'not-allowed' : 'pointer',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             transition: 'all 0.3s ease',
-            boxShadow: (isDownloading || !hasProcessedFile)
-              ? '0 4px 12px rgba(107, 114, 128, 0.3)'
-              : '0 4px 12px rgba(74, 222, 128, 0.3)',
-            opacity: (isDownloading || !hasProcessedFile) ? 0.7 : 1
+            boxShadow: '0 4px 12px rgba(74, 222, 128, 0.3)'
           }}
           onMouseEnter={(e) => {
-            if (!isDownloading && hasProcessedFile) {
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 6px 16px rgba(74, 222, 128, 0.4)'
-            }
+            e.currentTarget.style.transform = 'translateY(-2px)'
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(74, 222, 128, 0.4)'
           }}
           onMouseLeave={(e) => {
-            if (!isDownloading && hasProcessedFile) {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(74, 222, 128, 0.3)'
-            }
+            e.currentTarget.style.transform = 'translateY(0)'
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(74, 222, 128, 0.3)'
           }}
         >
-          <span>{isDownloading ? '⏳' : '⬇️'}</span>
-          <span>
-            {isDownloading ? 'Downloading...' : 
-             !hasProcessedFile ? 'No File Available' : 
-             results.downloadText}
-          </span>
+          <span>⬇️</span>
+          <span>{results.downloadText}</span>
         </button>
 
         <button
@@ -243,54 +223,6 @@ export const ProcessingResults: React.FC<ProcessingResultsProps> = ({
           <span>Process Another</span>
         </button>
       </div>
-
-      {/* Backend Status */}
-      {backendConnected !== null && (
-        <div style={{
-          marginTop: '20px',
-          textAlign: 'center',
-          padding: '12px',
-          borderRadius: '8px',
-          background: backendConnected 
-            ? 'rgba(34, 197, 94, 0.1)' 
-            : 'rgba(239, 68, 68, 0.1)',
-          border: `1px solid ${backendConnected 
-            ? 'rgba(34, 197, 94, 0.3)' 
-            : 'rgba(239, 68, 68, 0.3)'}`
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            color: backendConnected ? '#22c55e' : '#ef4444',
-            fontSize: '0.9rem',
-            fontWeight: '500'
-          }}>
-            <span>{backendConnected ? '✅' : '⚠️'}</span>
-            <span>
-              {backendConnected 
-                ? 'Connected to Python Backend - Real files generated' 
-                : 'Python Backend Offline - Using mock files'
-              }
-            </span>
-          </div>
-          {!backendConnected && (
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: '0.8rem',
-              margin: '8px 0 0 0'
-            }}>
-              Start your Flask app with: <code style={{ 
-                background: 'rgba(0, 0, 0, 0.2)', 
-                padding: '2px 6px', 
-                borderRadius: '4px',
-                fontSize: '0.8rem'
-              }}>python web_app.py</code>
-            </p>
-          )}
-        </div>
-      )}
 
       {/* Additional Actions */}
       {fileType === 'pdf' && (

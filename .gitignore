@@ -1,27 +1,3 @@
-# Node / Vite
-node_modules/
-dist/
-.vite/
-
-# Python
-venv/
-__pycache__/
-*.pyc
-
-# App runtime artifacts
-uploads/
-converted_pptx/
-hunted_fonts/
-extracted_fonts/
-web_app.log
-
-# Local test outputs
-*.pptx
-!templates/*.pptx
-
-# Vercel
-.vercel/
-
 # Python
 __pycache__/
 *.py[cod]

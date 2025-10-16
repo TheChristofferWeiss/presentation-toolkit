@@ -11,17 +11,13 @@ interface FileUploadProps {
   onCloudConnect: (service: 'dropbox' | 'googledrive') => void
   isProcessing: boolean
   processingType?: 'pdf-conversion' | 'font-hunting' | 'font-extraction' | 'presentation-processing'
-  backendConnected?: boolean | null
-  onCheckBackend?: () => void
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
   onFileUpload,
   onCloudConnect,
   isProcessing,
-  processingType,
-  backendConnected,
-  onCheckBackend
+  processingType
 }) => {
   const [dragActive, setDragActive] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
@@ -101,56 +97,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         }}>
           Upload PDFs to convert to PowerPoint, or presentations for font analysis
         </p>
-        
-        {/* Backend Status */}
-        {backendConnected !== null && (
-          <div style={{
-            marginTop: '16px',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            background: backendConnected 
-              ? 'rgba(34, 197, 94, 0.2)' 
-              : 'rgba(239, 68, 68, 0.2)',
-            border: `1px solid ${backendConnected 
-              ? 'rgba(34, 197, 94, 0.4)' 
-              : 'rgba(239, 68, 68, 0.4)'}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px'
-          }}>
-            <span style={{ fontSize: '1.2rem' }}>
-              {backendConnected ? '✅' : '⚠️'}
-            </span>
-            <span style={{
-              color: backendConnected ? '#22c55e' : '#ef4444',
-              fontSize: '0.9rem',
-              fontWeight: '500'
-            }}>
-              {backendConnected 
-                ? 'Python Backend Connected' 
-                : 'Python Backend Offline'
-              }
-            </span>
-            {onCheckBackend && (
-              <button
-                onClick={onCheckBackend}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  color: 'white',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  marginLeft: '8px'
-                }}
-              >
-                Check
-              </button>
-            )}
-          </div>
-        )}
         </div>
 
         {/* File Upload Area */}
