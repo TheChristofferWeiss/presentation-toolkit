@@ -40,97 +40,47 @@ function App() {
     }
     
     try {
-      // Try Supabase Edge Function first
+      // Use Supabase Edge Functions for all processing
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
       
-      if (supabaseUrl && supabaseKey && type === 'presentation-processing') {
-        console.log('Using Supabase Edge Function for presentation processing')
-        
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('presentationId', crypto.randomUUID())
-        formData.append('userId', 'demo-user')
-        
-        const response = await fetch(`${supabaseUrl}/functions/v1/process-presentation`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${supabaseKey}`,
-            'Content-Type': 'multipart/form-data',
-          },
-          body: formData,
-        })
-        
-        if (response.ok) {
-          const result = await response.json()
-          console.log('Supabase processing result:', result)
-          
-          // Create a results file from the response
-          const resultBlob = new Blob([JSON.stringify(result, null, 2)], { 
-            type: 'application/json' 
-          })
-          const resultFile = new File([resultBlob], `${file.name.replace(/\.[^/.]+$/, '')}_results.json`, {
-            type: 'application/json'
-          })
-          
-          setProcessedFile(resultFile)
-          setIsProcessing(false)
-          setProcessingType(undefined)
-          setProcessingComplete(true)
-          return
-        } else {
-          console.log('Supabase function failed, falling back to Flask backend')
-        }
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Supabase configuration missing')
       }
       
-      // Fallback to Flask backend
-      console.log('Using Flask backend for processing')
+      console.log('Using Supabase Edge Function for processing')
       
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('presentationId', crypto.randomUUID())
+      formData.append('userId', 'demo-user')
       
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
-      const response = await fetch(`${backendUrl}/${endpoint}`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/process-presentation`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
         body: formData,
       })
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorText = await response.text()
+        console.error('Supabase function error:', errorText)
+        throw new Error(`Processing failed: ${response.status} - ${errorText}`)
       }
       
-      // Handle different response types
-      const contentType = response.headers.get('content-type')
+      const result = await response.json()
+      console.log('Supabase processing result:', result)
       
-      if (contentType && contentType.includes('application/json')) {
-        // JSON response (like font hunting results)
-        const result = await response.json()
-        console.log('Processing result (JSON):', result)
-        
-        const resultBlob = new Blob([JSON.stringify(result, null, 2)], { 
-          type: 'application/json' 
-        })
-        const resultFile = new File([resultBlob], `${file.name.replace(/\.[^/.]+$/, '')}_results.json`, {
-          type: 'application/json'
-        })
-        setProcessedFile(resultFile)
-      } else {
-        // Binary response (like converted PPTX file)
-        const blob = await response.blob()
-        console.log('Received blob:', { size: blob.size, type: blob.type })
-        
-        const outputFileName = type === 'pdf-conversion' 
-          ? file.name.replace('.pdf', '.pptx')
-          : `${file.name.replace(/\.[^/.]+$/, '')}_results.zip`
-        
-        const processedFile = new File([blob], outputFileName, { 
-          type: blob.type || (type === 'pdf-conversion' ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation' : 'application/zip')
-        })
-        
-        console.log('Created processed file:', processedFile.name, 'Size:', processedFile.size, 'Type:', processedFile.type)
-        setProcessedFile(processedFile)
-      }
+      // Create a results file from the response
+      const resultBlob = new Blob([JSON.stringify(result, null, 2)], { 
+        type: 'application/json' 
+      })
+      const resultFile = new File([resultBlob], `${file.name.replace(/\.[^/.]+$/, '')}_results.json`, {
+        type: 'application/json'
+      })
       
+      setProcessedFile(resultFile)
       setIsProcessing(false)
       setProcessingType(undefined)
       setProcessingComplete(true)
@@ -138,8 +88,8 @@ function App() {
     } catch (error) {
       console.error('Error processing file:', error)
       
-      // If backend fails, fall back to mock processing
-      console.log('Backend processing failed, using mock processing')
+      // If Supabase fails, fall back to mock processing
+      console.log('Supabase processing failed, using mock processing')
       const processingTime = type === 'pdf-conversion' ? 3000 : 2000
       await new Promise(resolve => setTimeout(resolve, processingTime))
       
