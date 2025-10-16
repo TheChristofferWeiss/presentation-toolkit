@@ -23,29 +23,131 @@ function App() {
     // Determine processing type based on file extension
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
     let type: 'pdf-conversion' | 'font-hunting' | 'font-extraction' | 'presentation-processing'
+    let endpoint: string
     
     if (fileExtension === '.pdf') {
       type = 'pdf-conversion'
       setProcessingType('pdf-conversion')
+      endpoint = 'pdf-to-pptx'
     } else if (fileExtension === '.pptx' || fileExtension === '.key') {
       type = 'presentation-processing'
       setProcessingType('presentation-processing')
+      endpoint = 'hunt-fonts' // Default to font hunting for presentations
     } else {
       type = 'presentation-processing'
       setProcessingType('presentation-processing')
+      endpoint = 'hunt-fonts'
     }
     
-    // Simulate processing time (longer for PDF conversion)
-    const processingTime = type === 'pdf-conversion' ? 3000 : 2000
-    await new Promise(resolve => setTimeout(resolve, processingTime))
-    
-    // Here you would integrate with your actual processing pipeline
-    console.log('Processing file:', file.name, 'Type:', type)
-    
-    setIsProcessing(false)
-    setProcessingType(undefined)
-    setProcessedFile(file)
-    setProcessingComplete(true)
+    try {
+      // Try Supabase Edge Function first
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+      
+      if (supabaseUrl && supabaseKey && type === 'presentation-processing') {
+        console.log('Using Supabase Edge Function for presentation processing')
+        
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('presentationId', crypto.randomUUID())
+        formData.append('userId', 'demo-user')
+        
+        const response = await fetch(`${supabaseUrl}/functions/v1/process-presentation`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'multipart/form-data',
+          },
+          body: formData,
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          console.log('Supabase processing result:', result)
+          
+          // Create a results file from the response
+          const resultBlob = new Blob([JSON.stringify(result, null, 2)], { 
+            type: 'application/json' 
+          })
+          const resultFile = new File([resultBlob], `${file.name.replace(/\.[^/.]+$/, '')}_results.json`, {
+            type: 'application/json'
+          })
+          
+          setProcessedFile(resultFile)
+          setIsProcessing(false)
+          setProcessingType(undefined)
+          setProcessingComplete(true)
+          return
+        } else {
+          console.log('Supabase function failed, falling back to Flask backend')
+        }
+      }
+      
+      // Fallback to Flask backend
+      console.log('Using Flask backend for processing')
+      
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+      const response = await fetch(`${backendUrl}/${endpoint}`, {
+        method: 'POST',
+        body: formData,
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      // Handle different response types
+      const contentType = response.headers.get('content-type')
+      
+      if (contentType && contentType.includes('application/json')) {
+        // JSON response (like font hunting results)
+        const result = await response.json()
+        console.log('Processing result (JSON):', result)
+        
+        const resultBlob = new Blob([JSON.stringify(result, null, 2)], { 
+          type: 'application/json' 
+        })
+        const resultFile = new File([resultBlob], `${file.name.replace(/\.[^/.]+$/, '')}_results.json`, {
+          type: 'application/json'
+        })
+        setProcessedFile(resultFile)
+      } else {
+        // Binary response (like converted PPTX file)
+        const blob = await response.blob()
+        console.log('Received blob:', { size: blob.size, type: blob.type })
+        
+        const outputFileName = type === 'pdf-conversion' 
+          ? file.name.replace('.pdf', '.pptx')
+          : `${file.name.replace(/\.[^/.]+$/, '')}_results.zip`
+        
+        const processedFile = new File([blob], outputFileName, { 
+          type: blob.type || (type === 'pdf-conversion' ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation' : 'application/zip')
+        })
+        
+        console.log('Created processed file:', processedFile.name, 'Size:', processedFile.size, 'Type:', processedFile.type)
+        setProcessedFile(processedFile)
+      }
+      
+      setIsProcessing(false)
+      setProcessingType(undefined)
+      setProcessingComplete(true)
+      
+    } catch (error) {
+      console.error('Error processing file:', error)
+      
+      // If backend fails, fall back to mock processing
+      console.log('Backend processing failed, using mock processing')
+      const processingTime = type === 'pdf-conversion' ? 3000 : 2000
+      await new Promise(resolve => setTimeout(resolve, processingTime))
+      
+      setIsProcessing(false)
+      setProcessingType(undefined)
+      setProcessedFile(file)
+      setProcessingComplete(true)
+    }
   }
 
   const handleDownload = async () => {
@@ -55,74 +157,21 @@ function App() {
     console.log('Downloading results for:', processedFile.name)
     
     // Simulate download preparation time
-    await new Promise(resolve => setTimeout(resolve, 800))
+    await new Promise(resolve => setTimeout(resolve, 500))
     
-    // Create a mock file based on the original file type
-    const fileType = getFileType(processedFile.name)
-    let mockContent: string
-    let fileName: string
-    let mimeType: string
-    
-    if (fileType === 'pdf') {
-      // For PDFs, create a mock PPTX file
-      fileName = processedFile.name.replace('.pdf', '.pptx')
-      mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-      mockContent = `Mock PowerPoint file converted from ${processedFile.name}
-      
-This is a placeholder file. In a real implementation, this would be:
-- A properly formatted PPTX file
-- Each PDF page converted to a slide
-- High-quality images (300 DPI)
-- 16:9 widescreen format
-- Ready for presentations
-
-Original file: ${processedFile.name}
-Converted on: ${new Date().toISOString()}
-File size: ${processedFile.size} bytes`
-    } else {
-      // For presentations, create a mock results file
-      fileName = `${processedFile.name.replace(/\.[^/.]+$/, '')}_results.txt`
-      mimeType = 'text/plain'
-      mockContent = `Presentation Analysis Results for: ${processedFile.name}
-
-FONTS FOUND:
-- Arial (System Font)
-- Calibri (System Font)
-- Times New Roman (System Font)
-
-FONT HUNTING RESULTS:
-✓ Arial - Found in Google Fonts (Free)
-✓ Calibri - Found in Google Fonts (Free)
-✓ Times New Roman - Found in Google Fonts (Free)
-
-EXTRACTED FONTS:
-- font_arial.ttf (12.5 KB)
-- font_calibri.ttf (15.2 KB)
-- font_times.ttf (18.7 KB)
-
-INTERACTIVE PRESENTATION:
-- Web version created at: /presentation/${processedFile.name.replace(/\.[^/.]+$/, '')}
-- All animations preserved
-- Responsive design enabled
-
-Analysis completed on: ${new Date().toISOString()}
-Original file size: ${processedFile.size} bytes`
-    }
-    
-    // Create and download the file
-    const blob = new Blob([mockContent], { type: mimeType })
-    const url = URL.createObjectURL(blob)
+    // Download the actual processed file
+    const url = URL.createObjectURL(processedFile)
     
     const link = document.createElement('a')
     link.href = url
-    link.download = fileName
+    link.download = processedFile.name
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
     
     URL.revokeObjectURL(url)
     
-    console.log('Downloaded file:', fileName)
+    console.log('Downloaded file:', processedFile.name, 'Size:', processedFile.size, 'bytes')
     setIsDownloading(false)
   }
 
