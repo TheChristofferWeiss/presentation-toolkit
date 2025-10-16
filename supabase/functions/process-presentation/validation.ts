@@ -166,8 +166,8 @@ export function validateProcessingRequest(request: {
     return { valid: false, error: 'File is required' }
   }
 
-  if (!validatePPTX(request.file)) {
-    return { valid: false, error: 'Invalid PPTX file' }
+  if (!validateFile(request.file)) {
+    return { valid: false, error: 'Invalid file type. Only PDF and PPTX files are supported.' }
   }
 
   if (isFileTooLarge(request.file)) {
