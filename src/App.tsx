@@ -15,6 +15,7 @@ function App() {
   const [processingType, setProcessingType] = useState<'pdf-conversion' | 'font-hunting' | 'font-extraction' | 'presentation-processing' | undefined>()
   const [processingComplete, setProcessingComplete] = useState(false)
   const [processedFile, setProcessedFile] = useState<File | null>(null)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   const handleFileUpload = async (file: File) => {
     setIsProcessing(true)
@@ -52,11 +53,82 @@ function App() {
     // Here you would integrate with cloud storage APIs
   }
 
-  const handleDownload = () => {
-    console.log('Downloading results for:', processedFile?.name)
-    // Here you would trigger the actual download
-    // For now, we'll simulate it
-    alert(`Downloading results for ${processedFile?.name}`)
+  const handleDownload = async () => {
+    if (!processedFile || isDownloading) return
+    
+    setIsDownloading(true)
+    console.log('Downloading results for:', processedFile.name)
+    
+    // Simulate download preparation time
+    await new Promise(resolve => setTimeout(resolve, 800))
+    
+    // Create a mock file based on the original file type
+    const fileType = getFileType(processedFile.name)
+    let mockContent: string
+    let fileName: string
+    let mimeType: string
+    
+    if (fileType === 'pdf') {
+      // For PDFs, create a mock PPTX file
+      fileName = processedFile.name.replace('.pdf', '.pptx')
+      mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      mockContent = `Mock PowerPoint file converted from ${processedFile.name}
+      
+This is a placeholder file. In a real implementation, this would be:
+- A properly formatted PPTX file
+- Each PDF page converted to a slide
+- High-quality images (300 DPI)
+- 16:9 widescreen format
+- Ready for presentations
+
+Original file: ${processedFile.name}
+Converted on: ${new Date().toISOString()}
+File size: ${processedFile.size} bytes`
+    } else {
+      // For presentations, create a mock results file
+      fileName = `${processedFile.name.replace(/\.[^/.]+$/, '')}_results.txt`
+      mimeType = 'text/plain'
+      mockContent = `Presentation Analysis Results for: ${processedFile.name}
+
+FONTS FOUND:
+- Arial (System Font)
+- Calibri (System Font)
+- Times New Roman (System Font)
+
+FONT HUNTING RESULTS:
+✓ Arial - Found in Google Fonts (Free)
+✓ Calibri - Found in Google Fonts (Free)
+✓ Times New Roman - Found in Google Fonts (Free)
+
+EXTRACTED FONTS:
+- font_arial.ttf (12.5 KB)
+- font_calibri.ttf (15.2 KB)
+- font_times.ttf (18.7 KB)
+
+INTERACTIVE PRESENTATION:
+- Web version created at: /presentation/${processedFile.name.replace(/\.[^/.]+$/, '')}
+- All animations preserved
+- Responsive design enabled
+
+Analysis completed on: ${new Date().toISOString()}
+Original file size: ${processedFile.size} bytes`
+    }
+    
+    // Create and download the file
+    const blob = new Blob([mockContent], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    URL.revokeObjectURL(url)
+    
+    console.log('Downloaded file:', fileName)
+    setIsDownloading(false)
   }
 
   const handleProcessAnother = () => {
@@ -64,6 +136,7 @@ function App() {
     setProcessedFile(null)
     setIsProcessing(false)
     setProcessingType(undefined)
+    setIsDownloading(false)
   }
 
   const getFileType = (fileName: string): 'pdf' | 'pptx' | 'key' => {
@@ -177,6 +250,7 @@ function App() {
                   fileType={getFileType(processedFile.name)}
                   onDownload={handleDownload}
                   onProcessAnother={handleProcessAnother}
+                  isDownloading={isDownloading}
                 />
               </div>
             </div>
