@@ -48,11 +48,6 @@ function App() {
     setProcessingComplete(true)
   }
 
-  const handleCloudConnect = (service: 'dropbox' | 'googledrive') => {
-    console.log('Connecting to:', service)
-    // Here you would integrate with cloud storage APIs
-  }
-
   const handleDownload = async () => {
     if (!processedFile || isDownloading) return
     
@@ -238,7 +233,6 @@ Original file size: ${processedFile.size} bytes`
         <>
           <FileUpload
             onFileUpload={handleFileUpload}
-            onCloudConnect={handleCloudConnect}
             isProcessing={isProcessing}
             processingType={processingType}
           />
